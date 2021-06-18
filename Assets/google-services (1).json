@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "546865916873",
+    "firebase_url": "https://sem8project-809c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "sem8project-809c6",
+    "storage_bucket": "sem8project-809c6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:546865916873:android:25d8c431dcf4a915a69618",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.Sem8Project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "546865916873-hf73t4tgt2gq7k104bgs3qc77g8m1gpk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8MyeGYaZr7-I2NKLwtrAYUzHVTV5EsAA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "546865916873-hf73t4tgt2gq7k104bgs3qc77g8m1gpk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "546865916873-mrmad4t3reefsgqvtt373ot35e75c9ni.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.DefaultCompany.Sem8Project"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
