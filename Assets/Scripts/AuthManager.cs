@@ -37,6 +37,10 @@ public class AuthManager : MonoBehaviour
     public TMP_Text warningRegisterText;
     public TMP_Text confirmRegisterText;
 
+    [Header("MenuScreen")]
+    public TMP_Text warningMenuText;
+    public TMP_Text confirmMenuText;
+
     [Header("UserCreateData")]
     public TMP_InputField name;
     public TMP_InputField age;
@@ -119,6 +123,38 @@ public class AuthManager : MonoBehaviour
         copyEmailId = "";
 
         UIManager.instance.WelcomeScreen();
+    }
+
+
+    ///////////////////////////////////////////////////////    MENU_UI  BUTTONS   /////////////////////////////////////////////////
+
+    public void MenuToCreateButon()
+    {
+        StartCoroutine(IsCardCreated());
+    }
+
+    public IEnumerator IsCardCreated()
+    {
+        string key = getNodeForDB();
+        var DBTask = DBReference.Child("users").Child(key).GetValueAsync();
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to update task with {DBTask.Exception}");
+        }
+        else if (DBTask.Result.Value == null)
+        {
+            UIManager.instance.CreateScreen();
+        }
+        else
+        {
+            Debug.Log("Card exists!!");
+            warningMenuText.text = "You have already created a Card";
+            yield return new WaitForSeconds(1);
+            warningMenuText.text = "";
+        }
     }
 
     ///////////////////////////////////////////////////////    MENU_UI  CREATE    /////////////////////////////////////////////////
