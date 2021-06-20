@@ -52,8 +52,8 @@ public class AuthManager : MonoBehaviour
     public TMP_InputField age;
     public TMP_InputField profession;
     public TMP_InputField experience;
-    public TMP_Text confirmCreateText;
-    public TMP_Text warningCreateText;
+    public TMP_Text confirmCreateProfileText;
+    public TMP_Text warningCreateProfileText;
 
     [Header("UserCreateAboutData")]
     public TMP_InputField about;
@@ -68,6 +68,8 @@ public class AuthManager : MonoBehaviour
     public TMP_InputField mail;
     public TMP_InputField address;
     public TMP_InputField website;
+    public TMP_Text warningCreateContactText;
+    public TMP_Text confirmCreateContactText;
 
     [Header("UserUpdateData")]
     public TMP_InputField updateName;
@@ -196,25 +198,26 @@ public class AuthManager : MonoBehaviour
                     {
                         Profile.SetActive(false);
                         About.SetActive(true);
+                        warningCreateProfileText.text = "";
                     }
                     else
                     {
-                        warningCreateText.text = "Experience can't be empty";
+                        warningCreateProfileText.text = "Experience can't be empty";
                     }
                 }
                 else
                 {
-                    warningCreateText.text = "Profession can't be empty";
+                    warningCreateProfileText.text = "Profession can't be empty";
                 }
             }
             else
             {
-                warningCreateText.text = "Age can't be empty";
+                warningCreateProfileText.text = "Age can't be empty";
             }
         }
         else
         {
-            warningCreateText.text = "Name can't be empty"; 
+            warningCreateProfileText.text = "Name can't be empty"; 
         }
 
     }
@@ -222,8 +225,8 @@ public class AuthManager : MonoBehaviour
     public void CreateToMenu()
     {
         ClearCreateFields();
-        warningCreateText.text = "";
-        confirmCreateText.text = "";
+        warningCreateProfileText.text = "";
+        confirmCreateProfileText.text = "";
         UIManager.instance.MenuScreen();
     }
 
@@ -295,13 +298,16 @@ public class AuthManager : MonoBehaviour
 
     public IEnumerator SuccessCreated()
     {
-        warningCreateText.text = "";
-        confirmCreateText.text = "Created Successfully";
+        warningCreateContactText.text = "";
+        confirmCreateContactText.text = "Created Successfully";
+        yield return new WaitForSeconds(2);
+
+        confirmCreateContactText.text = "Upload your card pic";
         yield return new WaitForSeconds(2);
 
         ClearCreateFields();
         UIManager.instance.MenuScreen();
-        confirmCreateText.text = "";
+        confirmCreateContactText.text = "";
 
     }
 
@@ -331,11 +337,13 @@ public class AuthManager : MonoBehaviour
         string key;
         key = getNodeForDB();
 
+        Debug.Log("Hi");
         //Get the currently logged in user data
         var DBTask = DBReference.Child("users").Child(key).GetValueAsync();
 
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
 
+        Debug.Log("Bye");
         if (DBTask.Exception != null)
         {
             Debug.LogWarning(message: $"Failed to update task with {DBTask.Exception}");
@@ -352,6 +360,7 @@ public class AuthManager : MonoBehaviour
         }
         else
         {
+            Debug.Log("Im in!!");
             //Data has been retrieved
             DataSnapshot snapshot = DBTask.Result;
 
@@ -359,7 +368,6 @@ public class AuthManager : MonoBehaviour
             updateAge.text = snapshot.Child("profileage").Value.ToString();
             updateProfession.text = snapshot.Child("profileprofession").Value.ToString();
             updateExperience.text = snapshot.Child("profileexperience").Value.ToString();
-
         }
     }
 
@@ -432,7 +440,7 @@ public class AuthManager : MonoBehaviour
 
         ClearUpdateFields();
         UIManager.instance.MenuScreen();
-        confirmCreateText.text = "";
+        confirmUpdateText.text = "";
 
     }
 

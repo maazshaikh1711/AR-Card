@@ -141,7 +141,7 @@ public class CloudCardReco : MonoBehaviour
 
 		// stop the target finder (i.e. stop scanning the cloud)
 		mCloudRecoBehaviour.CloudRecoEnabled = false;
-
+		Debug.Log("Found image target named as ================>" + mTargetMetadata);
 		StartCoroutine(SetCardValues(mTargetMetadata));
 		
 	}
@@ -302,12 +302,12 @@ public class CloudCardReco : MonoBehaviour
 
 	public void CallButton()
 	{
-		Application.OpenURL(ContactPhone.text);
+		Application.OpenURL("tel:"+ContactPhone.text);
 	}
 
 	public void MailButton()
     {
-		Application.OpenURL(ContactMail.text);
+		Application.OpenURL("mailto:"+ContactMail.text);
     }
 
 	public void WebsiteButton()

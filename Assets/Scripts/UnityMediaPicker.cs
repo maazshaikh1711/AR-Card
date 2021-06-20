@@ -212,8 +212,8 @@ public class UnityMediaPicker : MonoBehaviour
         //}
     }
 
-    private IPicker picker = new PickerAndroid();
-    //private IPicker picker = new Picker_editor();
+    //private IPicker picker = new PickerAndroid();
+    private IPicker picker = new Picker_editor();
     //#if UNITY_IOS && !UNITY_EDITOR
     //new PickeriOS();
     //#elif UNITY_ANDROID && !UNITY_EDITOR

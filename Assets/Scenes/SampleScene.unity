@@ -18840,8 +18840,8 @@ MonoBehaviour:
   age: {fileID: 1821377054}
   profession: {fileID: 182756442}
   experience: {fileID: 1565449670}
-  confirmCreateText: {fileID: 947197762}
-  warningCreateText: {fileID: 1565934634}
+  confirmCreateProfileText: {fileID: 947197762}
+  warningCreateProfileText: {fileID: 1565934634}
   about: {fileID: 674429566}
   product1: {fileID: 698901490}
   product2: {fileID: 60796064}
@@ -18850,6 +18850,8 @@ MonoBehaviour:
   mail: {fileID: 1608331980}
   address: {fileID: 1188237019}
   website: {fileID: 1243259893}
+  warningCreateContactText: {fileID: 1185965452}
+  confirmCreateContactText: {fileID: 653092846}
   updateName: {fileID: 131462449}
   updateAge: {fileID: 2133542233}
   updateProfession: {fileID: 1083368952}
@@ -20377,7 +20379,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: About
+  m_text: About your business
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 749b9069dc4742c5bfa5c74644049926, type: 2}
