@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using UnityEngine.Networking;
 using System.Security.Cryptography;
 using System.IO;
 using System.Net;
@@ -167,6 +168,7 @@ public class UnityMediaPicker : MonoBehaviour
         WWW request = new WWW(serviceURI, System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(model)), headers);
         yield return request;
 
+        Debug.Log("..........");
         if (request.error != null)
         {
             Debug.Log("request error: " + request.error);

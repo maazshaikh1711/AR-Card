@@ -41,13 +41,33 @@ public class AuthManager : MonoBehaviour
     public TMP_Text warningMenuText;
     public TMP_Text confirmMenuText;
 
-    [Header("UserCreateData")]
+    [Header("Create Details Screens")]
+    public GameObject Profile;
+    public GameObject About;
+    public GameObject Products;
+    public GameObject Contact;
+
+    [Header("UserCreatePofileData")]
     public TMP_InputField name;
     public TMP_InputField age;
     public TMP_InputField profession;
     public TMP_InputField experience;
     public TMP_Text confirmCreateText;
     public TMP_Text warningCreateText;
+
+    [Header("UserCreateAboutData")]
+    public TMP_InputField about;
+
+    [Header("UserCreateProductsData")]
+    public TMP_InputField product1;
+    public TMP_InputField product2;
+    public TMP_InputField product3;
+
+    [Header("UserCreateContactData")]
+    public TMP_InputField phone;
+    public TMP_InputField mail;
+    public TMP_InputField address;
+    public TMP_InputField website;
 
     [Header("UserUpdateData")]
     public TMP_InputField updateName;
@@ -161,22 +181,8 @@ public class AuthManager : MonoBehaviour
 
 
 
-    public void CreateSubmitButton()
+    public void CreateProfileNextButton()
     {
-        //Logic to submit Card details
-        // 1. to Vuforia Cloud
-        ////////////////////////////  PENDING /////////////////////////////////////
-
-
-        // 2. to Firebase Database
-
-        StartCoroutine(UpdateEmailAuth(copyEmailId));
-
-        //Updating email with conditions (remove last @ and .   then replace all . with : )
-        //use same logic while scanning and checking in db
-
-        string key;
-        key = getNodeForDB();
 
         //check if name is valid
         if (!string.IsNullOrEmpty(name.text))
@@ -188,13 +194,8 @@ public class AuthManager : MonoBehaviour
                 {
                     if (!string.IsNullOrEmpty(experience.text))
                     {
-                        StartCoroutine(UpdateEmailDatabase(key, copyEmailId));
-                        StartCoroutine(UpdateNameDatabase(key, name.text));
-                        StartCoroutine(UpdateAgeDatabase(key, int.Parse(age.text)));
-                        StartCoroutine(UpdateProfessionDatabase(key, profession.text));
-                        StartCoroutine(UpdateExperienceDatabase(key, int.Parse(experience.text)));
-
-                        StartCoroutine(SuccessCreated());
+                        Profile.SetActive(false);
+                        About.SetActive(true);
                     }
                     else
                     {
@@ -225,6 +226,72 @@ public class AuthManager : MonoBehaviour
         confirmCreateText.text = "";
         UIManager.instance.MenuScreen();
     }
+
+
+    public void CreateAboutNextButton()
+    {
+        About.SetActive(false);
+        Products.SetActive(true);
+    }
+
+    public void CreateAboutToProfile()
+    {
+        About.SetActive(false);
+        Profile.SetActive(true);
+    }
+
+
+    public void CreateProductsNextButton()
+    {
+        Products.SetActive(false);
+        Contact.SetActive(true);
+    }
+
+    public void CreateProductsToAboutButton()
+    {
+        Products.SetActive(false);
+        About.SetActive(true);
+    }
+
+
+    public void CreateContactCreateButton()
+    {
+        StartCoroutine(UpdateEmailAuth(copyEmailId));
+
+        //Updating email with conditions (remove last @ and .   then replace all . with : )
+        //use same logic while scanning and checking in db
+        string key;
+        key = getNodeForDB();
+
+        //Profile
+        StartCoroutine(UpdateEmailDatabase(key, copyEmailId));
+        StartCoroutine(UpdateNameDatabase(key, name.text));
+        StartCoroutine(UpdateAgeDatabase(key, int.Parse(age.text)));
+        StartCoroutine(UpdateProfessionDatabase(key, profession.text));
+        StartCoroutine(UpdateExperienceDatabase(key, int.Parse(experience.text)));
+
+        //About
+        StartCoroutine(UpdateAboutDatabase(key, about.text));
+
+        //Products
+        StartCoroutine(UpdataProductsDatabase(key, product1.text, product2.text, product3.text));
+
+        //
+        StartCoroutine(UpdateContactPhoneDatabase(key, phone.text));
+        StartCoroutine(UpdateContactMailDatabase(key, mail.text));
+        StartCoroutine(UpdateContactAddressDatabase(key, address.text));
+        StartCoroutine(UpdateContactWebsiteDatabase(key, website.text));
+
+        StartCoroutine(SuccessCreated());
+    }
+
+    public void CreateContactToProductsButton()
+    {
+        Contact.SetActive(false);
+        Products.SetActive(true);
+    }
+
+
 
     public IEnumerator SuccessCreated()
     {
@@ -288,10 +355,10 @@ public class AuthManager : MonoBehaviour
             //Data has been retrieved
             DataSnapshot snapshot = DBTask.Result;
 
-            updateName.text = snapshot.Child("name").Value.ToString();
-            updateAge.text = snapshot.Child("age").Value.ToString();
-            updateProfession.text = snapshot.Child("profession").Value.ToString();
-            updateExperience.text = snapshot.Child("experience").Value.ToString();
+            updateName.text = snapshot.Child("profilename").Value.ToString();
+            updateAge.text = snapshot.Child("profileage").Value.ToString();
+            updateProfession.text = snapshot.Child("profileprofession").Value.ToString();
+            updateExperience.text = snapshot.Child("profileexperience").Value.ToString();
 
         }
     }
@@ -690,7 +757,7 @@ public class AuthManager : MonoBehaviour
     private IEnumerator UpdateNameDatabase(string key, string _name)
     {
         //Set the currently logged in user username in the database
-        var DBTask = DBReference.Child("users").Child(key).Child("name").SetValueAsync(_name);
+        var DBTask = DBReference.Child("users").Child(key).Child("profilename").SetValueAsync(_name);
 
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
 
@@ -707,7 +774,7 @@ public class AuthManager : MonoBehaviour
     private IEnumerator UpdateAgeDatabase(string key, int _age)
     {
         //Set the currently logged in user username in the database
-        var DBTask = DBReference.Child("users").Child(key).Child("age").SetValueAsync(_age);
+        var DBTask = DBReference.Child("users").Child(key).Child("profileage").SetValueAsync(_age);
 
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
 
@@ -724,7 +791,7 @@ public class AuthManager : MonoBehaviour
     private IEnumerator UpdateProfessionDatabase(string key, string _profession)
     {
         //Set the currently logged in user username in the database
-        var DBTask = DBReference.Child("users").Child(key).Child("profession").SetValueAsync(_profession);
+        var DBTask = DBReference.Child("users").Child(key).Child("profileprofession").SetValueAsync(_profession);
 
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
 
@@ -741,7 +808,7 @@ public class AuthManager : MonoBehaviour
     private IEnumerator UpdateExperienceDatabase(string key, int _experience)
     {
         //Set the currently logged in user username in the database
-        var DBTask = DBReference.Child("users").Child(key).Child("experience").SetValueAsync(_experience);
+        var DBTask = DBReference.Child("users").Child(key).Child("profileexperience").SetValueAsync(_experience);
             
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
 
@@ -756,6 +823,113 @@ public class AuthManager : MonoBehaviour
     }
 
 
+    public IEnumerator UpdateAboutDatabase(string key, string about)
+    {
+        var DBTask = DBReference.Child("users").Child(key).Child("about").SetValueAsync(about);
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
+        }
+        else
+        {
+            //Database username is now updated
+        }
+    }
+
+
+    public IEnumerator UpdataProductsDatabase(string key, string p1, string p2, string p3)
+    {
+        var DBTask = DBReference.Child("users").Child(key).Child("productp1").SetValueAsync(p1);
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
+        }
+        else
+        {
+            //Database username is now updated
+        }
+
+        DBTask = DBReference.Child("users").Child(key).Child("productp2").SetValueAsync(p2);
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        DBTask = DBReference.Child("users").Child(key).Child("productp3").SetValueAsync(p3);
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+    }
+
+
+    public IEnumerator UpdateContactPhoneDatabase(string key, string phone)
+    {
+        var DBTask = DBReference.Child("users").Child(key).Child("contactphone").SetValueAsync(phone);
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
+        }
+        else
+        {
+            //Database username is now updated
+        }
+
+    }
+
+    public IEnumerator UpdateContactMailDatabase(string key, string mail)
+    {
+        var DBTask = DBReference.Child("users").Child(key).Child("contactmail").SetValueAsync(mail);
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
+        }
+        else
+        {
+            //Database username is now updated
+        }
+
+    }
+
+    public IEnumerator UpdateContactAddressDatabase(string key, string address)
+    {
+        var DBTask = DBReference.Child("users").Child(key).Child("contactaddress").SetValueAsync(address);
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
+        }
+        else
+        {
+            //Database username is now updated
+        }
+
+    }
+
+    public IEnumerator UpdateContactWebsiteDatabase(string key, string website)
+    {
+        var DBTask = DBReference.Child("users").Child(key).Child("contactwebsite").SetValueAsync(website);
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
+        }
+        else
+        {
+            //Database username is now updated
+        }
+
+    }
 
     public void Exit()
     {

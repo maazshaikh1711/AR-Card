@@ -26,6 +26,7 @@ public class CloudCardReco : MonoBehaviour
 
 	[Header("Canvas")]
 	public GameObject LoginPage;
+	public GameObject CardCanvas;
 
 	//Login variables
 	[Header("Login")]
@@ -35,6 +36,7 @@ public class CloudCardReco : MonoBehaviour
 	public TMP_Text confirmLoginText;
 
 	[Header("Card Details")]
+	//Profile
 	public TMP_Text TitleName;
 	public TMP_Text TitleProfession;
 	public TMP_Text ProfileName;
@@ -42,6 +44,19 @@ public class CloudCardReco : MonoBehaviour
 	public TMP_Text ProfileProfession;
 	public TMP_Text ProfileExperience;
 
+	//About
+	public TMP_Text Aboutabout;
+
+	//Product
+	public TMP_Text Product1;
+	public TMP_Text Product2;
+	public TMP_Text Product3;
+
+	//Contact
+	public TMP_Text ContactPhone;
+	public TMP_Text ContactMail;
+	public TMP_Text ContactAddress;
+	public TMP_Text ContactWebsite;
 
 	// Register cloud reco callbacks
 	void Awake()
@@ -112,7 +127,6 @@ public class CloudCardReco : MonoBehaviour
 			(TargetFinder.CloudRecoSearchResult)targetSearchResult;
 		// do something with the target metadata
 		mTargetMetadata = cloudRecoSearchResult.MetaData;
-		// stop the target finder (i.e. stop scanning the cloud)
 
 		
 		// Build augmentation based on target 
@@ -122,9 +136,14 @@ public class CloudCardReco : MonoBehaviour
 			ObjectTracker tracker = TrackerManager.Instance.GetTracker<ObjectTracker>();
 			tracker.GetTargetFinder<ImageTargetFinder>().EnableTracking(targetSearchResult, ImageTargetTemplate.gameObject);
 		}
-		
+
+		//CardCanvas.SetActive(true);
+
+		// stop the target finder (i.e. stop scanning the cloud)
 		mCloudRecoBehaviour.CloudRecoEnabled = false;
+
 		StartCoroutine(SetCardValues(mTargetMetadata));
+		
 	}
 
 	private void InitializeFirebase()
@@ -255,16 +274,56 @@ public class CloudCardReco : MonoBehaviour
 			//Data has been retrieved
 			DataSnapshot snapshot = DBTask.Result;
 
-			TitleName.text = snapshot.Child("name").Value.ToString();
-			TitleProfession.text = snapshot.Child("profession").Value.ToString();
+			TitleName.text = snapshot.Child("profilename").Value.ToString();
+			TitleProfession.text = snapshot.Child("profileprofession").Value.ToString();
 
-			ProfileName.text = snapshot.Child("name").Value.ToString();
-			ProfileAge.text = snapshot.Child("age").Value.ToString();
-			ProfileProfession.text = snapshot.Child("profession").Value.ToString();
-			ProfileExperience.text = snapshot.Child("experience").Value.ToString();
+			//Profile
+			ProfileName.text = snapshot.Child("profilename").Value.ToString();
+			ProfileAge.text = snapshot.Child("profileage").Value.ToString();
+			ProfileProfession.text = snapshot.Child("profileprofession").Value.ToString();
+			ProfileExperience.text = snapshot.Child("profileexperience").Value.ToString();
 
+			//About
+			Aboutabout.text = snapshot.Child("about").Value.ToString();
+
+			//Products
+			Product1.text = snapshot.Child("productp1").Value.ToString();
+			Product2.text = snapshot.Child("productp2").Value.ToString();
+			Product3.text = snapshot.Child("productp3").Value.ToString();
+
+			//Contact
+			ContactPhone.text = snapshot.Child("contactphone").Value.ToString();
+			ContactMail.text = snapshot.Child("contactmail").Value.ToString();
+			ContactAddress.text = snapshot.Child("contactaddress").Value.ToString();
+			ContactWebsite.text = snapshot.Child("contactwebsite").Value.ToString();
+		
 		}
 	}
+
+	public void CallButton()
+	{
+		Application.OpenURL(ContactPhone.text);
+	}
+
+	public void MailButton()
+    {
+		Application.OpenURL(ContactMail.text);
+    }
+
+	public void WebsiteButton()
+    {
+		Application.OpenURL(ContactWebsite.text);
+    }
+
+	public void CardLost()
+    {
+		CardCanvas.SetActive(false);
+    }
+
+	public void CardFound()
+    {
+		CardCanvas.SetActive(true);
+    }
 
 
 
@@ -283,6 +342,7 @@ public class CloudCardReco : MonoBehaviour
 				// Restart TargetFinder
 				mCloudRecoBehaviour.CloudRecoEnabled = true;
 				mTargetMetadata = "";
+				CardLost();
 			}
 		}
 
