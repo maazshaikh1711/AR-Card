@@ -1,7 +1,8 @@
 using System;
 using System.Collections;
-//using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Firebase;
 using Firebase.Database;
 using Firebase.Auth;
@@ -46,6 +47,7 @@ public class AuthManager : MonoBehaviour
     public GameObject About;
     public GameObject Products;
     public GameObject Contact;
+    public GameObject Privacy;
 
     [Header("UserCreatePofileData")]
     public TMP_InputField name;
@@ -70,6 +72,12 @@ public class AuthManager : MonoBehaviour
     public TMP_InputField website;
     public TMP_Text warningCreateContactText;
     public TMP_Text confirmCreateContactText;
+
+    [Header("UserCreatePrivacyData")]
+    public Toggle publicToggler;
+    private bool publicaccess = true;
+    public GameObject CreatePrivacyPrivateObject;
+    public TMP_InputField privatemails;
 
     [Header("UserUpdateData")]
     public TMP_InputField updateName;
@@ -174,7 +182,7 @@ public class AuthManager : MonoBehaviour
         {
             Debug.Log("Card exists!!");
             warningMenuText.text = "You have already created a Card";
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(2);
             warningMenuText.text = "";
         }
     }
@@ -256,8 +264,19 @@ public class AuthManager : MonoBehaviour
         About.SetActive(true);
     }
 
+    public void CreateContactToProductsButton()
+    {
+        Contact.SetActive(false);
+        Products.SetActive(true);
+    }
 
-    public void CreateContactCreateButton()
+    public void CreateContactNextButton()
+    {
+        Contact.SetActive(false);
+        Privacy.SetActive(true);
+    }
+
+    public void CreatePrivacyCreateButton()
     {
         StartCoroutine(UpdateEmailAuth(copyEmailId));
 
@@ -279,22 +298,79 @@ public class AuthManager : MonoBehaviour
         //Products
         StartCoroutine(UpdataProductsDatabase(key, product1.text, product2.text, product3.text));
 
-        //
+        //Contact
         StartCoroutine(UpdateContactPhoneDatabase(key, phone.text));
         StartCoroutine(UpdateContactMailDatabase(key, mail.text));
         StartCoroutine(UpdateContactAddressDatabase(key, address.text));
         StartCoroutine(UpdateContactWebsiteDatabase(key, website.text));
 
+        //Privacy
+        Debug.Log(publicToggler.GetComponent<Toggle>().isOn);
+        publicaccess = publicToggler.GetComponent<Toggle>().isOn;
+
+        StartCoroutine(UpdatePrivacyAccessDatabase(key, publicaccess));
+
+        string[] allmails = privatemails.text.Split(new char[] { ',' });
+        List<string> list = new List<string>();
+        string finalmails = "";
+
+        foreach (string mail in allmails)
+        {
+            string tempkey = string.Empty;
+            string keycopy = "";
+            string delete = ".";
+
+            //reversing emailid
+            for (int i = mail.Length - 1; i >= 0; i--)
+            {
+                tempkey += mail[i];
+            }
+
+            //removing @ and last .
+            for (int i = 0; i < tempkey.Length; i++)
+            {
+                if (tempkey[i] == System.Convert.ToChar(delete))
+                {
+                    delete = "@";
+                }
+                else
+                {
+                    keycopy += tempkey[i];
+                }
+            }
+            tempkey = string.Empty;
+
+            //reversing keycopy
+            for (int i = keycopy.Length - 1; i >= 0; i--)
+            {
+                tempkey += keycopy[i];
+            }
+
+            tempkey = tempkey.Replace(".", ":");
+
+            list.Add(tempkey);
+        }
+
+        finalmails = String.Join(",", list.ToArray());
+
+        StartCoroutine(UpdatePrivacyMailsDatabase(key, finalmails));
+        
         StartCoroutine(SuccessCreated());
     }
 
-    public void CreateContactToProductsButton()
+    public void CreatePrivacyToContactButton()
     {
-        Contact.SetActive(false);
-        Products.SetActive(true);
+        Privacy.SetActive(false);
+        Contact.SetActive(true);
     }
 
-
+    public void privateObjectToggler(bool toggle)
+    {
+        if (toggle)
+            CreatePrivacyPrivateObject.SetActive(false);
+        else
+            CreatePrivacyPrivateObject.SetActive(true);
+    }
 
     public IEnumerator SuccessCreated()
     {
@@ -936,7 +1012,38 @@ public class AuthManager : MonoBehaviour
         {
             //Database username is now updated
         }
+    }
 
+    public IEnumerator UpdatePrivacyAccessDatabase(string key, bool value)
+    {
+        var DBTask = DBReference.Child("users").Child(key).Child("public").SetValueAsync(value);
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
+        }
+        else
+        {
+            //Database username is now updated
+        }
+    }
+
+    public IEnumerator UpdatePrivacyMailsDatabase(string key, string mails)
+    {
+        var DBTask = DBReference.Child("users").Child(key).Child("accessto").SetValueAsync(mails);
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to register task with {DBTask.Exception}");
+        }
+        else
+        {
+            //Database username is now updated
+        }
     }
 
     public void Exit()

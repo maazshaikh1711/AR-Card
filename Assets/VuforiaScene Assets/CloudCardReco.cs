@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 using Firebase;
 using Firebase.Database;
@@ -11,7 +12,7 @@ public class CloudCardReco : MonoBehaviour
 {
 	public ImageTargetBehaviour ImageTargetTemplate;
 	private CloudRecoBehaviour mCloudRecoBehaviour;
-	private bool mIsScanning = false;
+	private bool mIsScanning = true;
 	private string mTargetMetadata = "";
 	//public static UIManager instance;
 
@@ -58,6 +59,14 @@ public class CloudCardReco : MonoBehaviour
 	public TMP_Text ContactAddress;
 	public TMP_Text ContactWebsite;
 
+
+	[Header("Popup")]
+	public GameObject Popup;
+
+	//other variables
+	private string temp;
+	private bool show = false;
+ 
 	// Register cloud reco callbacks
 	void Awake()
 	{
@@ -127,8 +136,8 @@ public class CloudCardReco : MonoBehaviour
 			(TargetFinder.CloudRecoSearchResult)targetSearchResult;
 		// do something with the target metadata
 		mTargetMetadata = cloudRecoSearchResult.MetaData;
+		Debug.Log("Found image target named as ================>" + mTargetMetadata);
 
-		
 		// Build augmentation based on target 
 		if (ImageTargetTemplate)
 		{
@@ -139,11 +148,11 @@ public class CloudCardReco : MonoBehaviour
 
 		//CardCanvas.SetActive(true);
 
+		StartCoroutine(ShowData(mTargetMetadata, emailLoginField.text));
+
 		// stop the target finder (i.e. stop scanning the cloud)
 		mCloudRecoBehaviour.CloudRecoEnabled = false;
-		Debug.Log("Found image target named as ================>" + mTargetMetadata);
-		StartCoroutine(SetCardValues(mTargetMetadata));
-		
+
 	}
 
 	private void InitializeFirebase()
@@ -250,9 +259,72 @@ public class CloudCardReco : MonoBehaviour
 		return key;
 	}
 
+
+	public IEnumerator ShowData(string key, string myEmail)
+	{
+		Debug.Log("Checking Permissions.");
+		string dbkey = getNodeForDB(key);
+		string mykey = getNodeForDB(myEmail);
+
+		var DBTask = DBReference.Child("users").Child(dbkey).GetValueAsync();
+
+		yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+		if (DBTask.Exception != null)
+		{
+			Debug.LogWarning(message: $"Failed to update task with {DBTask.Exception}");
+		}
+		else if (DBTask.Result.Value == null)
+		{
+			//No data exists yet
+			//warningUpdateText.text = "Create your card to update details";
+			//confirmUpdateText.text = "";
+		}
+		else
+		{
+			DataSnapshot snapshot = DBTask.Result;
+
+			if (mykey == dbkey)
+			{
+				Debug.Log("This is my own card");
+				show = true;
+				StartCoroutine(SetCardValues(key));
+			}
+
+			else if ((Boolean)snapshot.Child("public").Value)
+			{
+				Debug.Log("Card is public");
+				show = true;
+				StartCoroutine(SetCardValues(key));
+			}
+			else
+			{
+				Debug.Log("Card is private, checking if you can access it!!");
+				string mails = snapshot.Child("accessto").Value.ToString();
+
+				string[] mailList = mails.Split(new char[] { ',' });
+
+
+				foreach (string mail in mailList)
+				{
+					if (mail == mykey)
+					{
+						Debug.Log("Good new!! You can access this card!!");
+						show = true;        //give permission to show card
+						StartCoroutine(SetCardValues(key));
+						break;
+					}
+				}
+
+				Debug.Log("Bad new!! You can't access this card!!");
+
+			}
+		}		
+	}
+
 	public IEnumerator SetCardValues(string key)
     {
-		Debug.Log("================================Setting values");
+		Debug.Log("==============================>Setting values");
 
 		string dbkey = getNodeForDB(key);
 		var DBTask = DBReference.Child("users").Child(dbkey).GetValueAsync();
@@ -284,25 +356,80 @@ public class CloudCardReco : MonoBehaviour
 			ProfileExperience.text = snapshot.Child("profileexperience").Value.ToString();
 
 			//About
-			Aboutabout.text = snapshot.Child("about").Value.ToString();
+			temp = snapshot.Child("about").Value.ToString();
+			if (temp != "")
+				Aboutabout.text = temp;
+			else
+				Aboutabout.text = "Description not provided.";
 
 			//Products
-			Product1.text = snapshot.Child("productp1").Value.ToString();
-			Product2.text = snapshot.Child("productp2").Value.ToString();
-			Product3.text = snapshot.Child("productp3").Value.ToString();
+			//product1
+			temp = snapshot.Child("productp1").Value.ToString();
+			if (temp == "")
+				Product1.text = "No name specified";
+			else
+				Product1.text = snapshot.Child("productp1").Value.ToString();
+
+			//product2
+			temp = snapshot.Child("productp2").Value.ToString();
+			if (temp == "")
+				Product2.text = "No name specified";  
+			else
+				Product2.text = snapshot.Child("productp2").Value.ToString();
+
+			//product3
+			temp = snapshot.Child("productp3").Value.ToString();
+			if (temp == "")
+				Product3.text = "No name specified";
+			else
+				Product3.text = snapshot.Child("productp3").Value.ToString(); 
+
 
 			//Contact
-			ContactPhone.text = snapshot.Child("contactphone").Value.ToString();
-			ContactMail.text = snapshot.Child("contactmail").Value.ToString();
-			ContactAddress.text = snapshot.Child("contactaddress").Value.ToString();
-			ContactWebsite.text = snapshot.Child("contactwebsite").Value.ToString();
-		
+			//phone
+			temp = snapshot.Child("contactphone").Value.ToString();
+			if (temp == "")
+				ContactPhone.text = "Phone No. not provided";
+			else
+				ContactPhone.text = temp;
+
+			//mail
+			temp = snapshot.Child("contactmail").Value.ToString();
+			if (temp == "")
+				ContactMail.text = "Mail Id not provided";
+			else
+				ContactMail.text = temp;
+
+			//address
+			temp = snapshot.Child("contactaddress").Value.ToString();
+			if (temp == "")
+				ContactAddress.text = "Address not provided";
+			else
+				ContactAddress.text = temp;
+
+			//website
+			temp = snapshot.Child("contactwebsite").Value.ToString();
+			if (temp == "")
+				ContactWebsite.text = "Website not provided";
+			else
+				ContactWebsite.text = temp;
+
+			temp = "";
+			CardCanvas.SetActive(true);
 		}
 	}
 
 	public void CallButton()
 	{
-		Application.OpenURL("tel:"+ContactPhone.text);
+		if (ContactPhone.text == "")
+		{
+			StartCoroutine(ShowPopup());
+		}
+		else
+		{
+			Debug.Log(ContactPhone.text);
+			Application.OpenURL("tel:" + ContactPhone.text);
+		}
 	}
 
 	public void MailButton()
@@ -315,6 +442,14 @@ public class CloudCardReco : MonoBehaviour
 		Application.OpenURL(ContactWebsite.text);
     }
 
+
+	public IEnumerator ShowPopup()
+    {
+		Popup.SetActive(true);
+		yield return new WaitForSeconds(2);
+		Popup.SetActive(false);
+	}
+
 	public void CardLost()
     {
 		CardCanvas.SetActive(false);
@@ -322,8 +457,12 @@ public class CloudCardReco : MonoBehaviour
 
 	public void CardFound()
     {
-		CardCanvas.SetActive(true);
-    }
+		if (show)
+		{
+			Debug.Log("CardFound:::::::::::::::::::::::::::::::::::::;");
+			CardCanvas.SetActive(true);
+		}
+	}
 
 
 
@@ -348,6 +487,12 @@ public class CloudCardReco : MonoBehaviour
 
 		if (GUI.Button(new Rect(Screen.width-200, Screen.height-75, 150, 50), "Back"))
 		{
+			auth.SignOut();
+
+			mCloudRecoBehaviour.CloudRecoEnabled = false;
+			mTargetMetadata = "";
+			CardLost();
+
 			//Back to WelcomeUI
 			SceneManager.LoadScene("SampleScene");
 			SceneManager.UnloadSceneAsync("VuforiaScene");
