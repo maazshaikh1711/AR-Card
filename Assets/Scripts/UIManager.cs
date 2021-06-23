@@ -31,13 +31,13 @@ public class UIManager : MonoBehaviour
 
     public void ClearScreen()
     {
+        welcomeUI.SetActive(false);
         loginUI.SetActive(false);
         registerUI.SetActive(false);
         menuUI.SetActive(false);
         createUI.SetActive(false);
         updateUI.SetActive(false);
         deleteUI.SetActive(false);
-        welcomeUI.SetActive(false);
     }
 
     //Functions to change the screens in UI
@@ -47,12 +47,12 @@ public class UIManager : MonoBehaviour
         welcomeUI.SetActive(true);
     }
     
-    public void LoginScreen() //Back button
+    public void LoginScreen()
     {
         ClearScreen();
         loginUI.SetActive(true);
     }   
-    public void RegisterScreen() // Register button
+    public void RegisterScreen()
     {
         ClearScreen();
         registerUI.SetActive(true);

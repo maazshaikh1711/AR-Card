@@ -10,7 +10,6 @@ using System.IO;
 using System.Net;
 using TMPro;
 
-
 public class PostNewTrackableRequest
 {
     public string name;
@@ -84,7 +83,6 @@ public class UnityMediaPicker : MonoBehaviour
 
     private IEnumerator LoadImage(string path, Image output)
     {
-
         //Loading of image starts here
         var url = "file://" + path;
         var www = new WWW(url);
@@ -168,7 +166,6 @@ public class UnityMediaPicker : MonoBehaviour
         WWW request = new WWW(serviceURI, System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(model)), headers);
         yield return request;
 
-        Debug.Log("..........");
         if (request.error != null)
         {
             Debug.Log("request error: " + request.error);
@@ -214,14 +211,19 @@ public class UnityMediaPicker : MonoBehaviour
 
     private IPicker picker = new PickerAndroid();
     //private IPicker picker = new Picker_editor();
+    
     //#if UNITY_IOS && !UNITY_EDITOR
     //new PickeriOS();
+    
     //#elif UNITY_ANDROID && !UNITY_EDITOR
-
+    //new PickerAndroid();
+    
     //#elif UNITY_EDITOR_OSX || UNITY_EDITOR_WIN
     //new Picker_editor();
+    
     //#else
     //new PickerUnsupported();
+    
     //#endif
     public void Show(string title, string outputFileName, int maxSize)
     {

@@ -309,14 +309,16 @@ public class CloudCardReco : MonoBehaviour
 				{
 					if (mail == mykey)
 					{
-						Debug.Log("Good new!! You can access this card!!");
+						Debug.Log("Good news!! You can access this card!!");
 						show = true;        //give permission to show card
 						StartCoroutine(SetCardValues(key));
 						break;
 					}
 				}
 
-				Debug.Log("Bad new!! You can't access this card!!");
+				yield return new WaitForSeconds(1); 
+
+				Debug.Log("Bad news!! You can't access this card!!");
 
 			}
 		}		
@@ -324,7 +326,7 @@ public class CloudCardReco : MonoBehaviour
 
 	public IEnumerator SetCardValues(string key)
     {
-		Debug.Log("==============================>Setting values");
+		Debug.Log("=============>Setting card values");
 
 		string dbkey = getNodeForDB(key);
 		var DBTask = DBReference.Child("users").Child(dbkey).GetValueAsync();
@@ -427,7 +429,6 @@ public class CloudCardReco : MonoBehaviour
 		}
 		else
 		{
-			Debug.Log(ContactPhone.text);
 			Application.OpenURL("tel:" + ContactPhone.text);
 		}
 	}
@@ -452,6 +453,7 @@ public class CloudCardReco : MonoBehaviour
 
 	public void CardLost()
     {
+		Debug.Log("Card Lost:::::::::::::::::::::::::::::::::::::");
 		CardCanvas.SetActive(false);
     }
 
@@ -459,7 +461,7 @@ public class CloudCardReco : MonoBehaviour
     {
 		if (show)
 		{
-			Debug.Log("CardFound:::::::::::::::::::::::::::::::::::::;");
+			Debug.Log("Card Found:::::::::::::::::::::::::::::::::::::");
 			CardCanvas.SetActive(true);
 		}
 	}
@@ -476,16 +478,17 @@ public class CloudCardReco : MonoBehaviour
 		// so that user can restart cloud scanning
 		if (!mIsScanning)
 		{
-			if (GUI.Button(new Rect((Screen.width/2)-100, Screen.height-75, 200, 50), "Restart Scanning"))
+			if (GUI.Button(new Rect((Screen.width/2)-250 , Screen.height-100, 200, 70), "Restart Scanning"))
 			{
 				// Restart TargetFinder
 				mCloudRecoBehaviour.CloudRecoEnabled = true;
 				mTargetMetadata = "";
 				CardLost();
+				show = false;
 			}
 		}
 
-		if (GUI.Button(new Rect(Screen.width-200, Screen.height-75, 150, 50), "Back"))
+		if (GUI.Button(new Rect(Screen.width-250, Screen.height-75, 200, 50), "Back"))
 		{
 			auth.SignOut();
 

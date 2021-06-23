@@ -119,11 +119,4 @@ public class ShowCard : MonoBehaviour
             //ScanPage.SetActive(true);
         }
     }
-
-    // Update is called once per frame
-    public void Test()
-    {
-        Debug.Log("............................In test");
-    }
-
 }

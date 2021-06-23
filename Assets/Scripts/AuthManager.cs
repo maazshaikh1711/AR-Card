@@ -8,7 +8,6 @@ using Firebase.Database;
 using Firebase.Auth;
 using Firebase.Analytics;
 //using Firebase.Firestore.DocumentReference;
-using UnityEngine.SceneManagement;
 using TMPro;
 
 public class AuthManager : MonoBehaviour
@@ -70,14 +69,15 @@ public class AuthManager : MonoBehaviour
     public TMP_InputField mail;
     public TMP_InputField address;
     public TMP_InputField website;
-    public TMP_Text warningCreateContactText;
-    public TMP_Text confirmCreateContactText;
 
     [Header("UserCreatePrivacyData")]
     public Toggle publicToggler;
     private bool publicaccess = true;
     public GameObject CreatePrivacyPrivateObject;
     public TMP_InputField privatemails;
+    public TMP_Text warningCreatePrivacyText;
+    public TMP_Text confirmCreatePrivacyText;
+
 
     [Header("UserUpdateData")]
     public TMP_InputField updateName;
@@ -86,6 +86,15 @@ public class AuthManager : MonoBehaviour
     public TMP_InputField updateExperience;
     public TMP_Text confirmUpdateText;
     public TMP_Text warningUpdateText;
+    public GameObject UpdateProfileScene;
+
+    public GameObject UpdatePrivacyScene;
+    public Toggle updatePrivacyToggler;
+    private bool updatePrivacyAccess = true;
+    public GameObject UpdatePrivacyPrivateObject;
+    public TMP_InputField updateprivatemails;
+    public TMP_Text warningUpdatePrivacyText;
+    public TMP_Text confirmUpdatePrivacyText;
 
     [Header("UserDeleteData")]
     public TMP_InputField passwordDeleteField;
@@ -310,49 +319,8 @@ public class AuthManager : MonoBehaviour
 
         StartCoroutine(UpdatePrivacyAccessDatabase(key, publicaccess));
 
-        string[] allmails = privatemails.text.Split(new char[] { ',' });
-        List<string> list = new List<string>();
-        string finalmails = "";
-
-        foreach (string mail in allmails)
-        {
-            string tempkey = string.Empty;
-            string keycopy = "";
-            string delete = ".";
-
-            //reversing emailid
-            for (int i = mail.Length - 1; i >= 0; i--)
-            {
-                tempkey += mail[i];
-            }
-
-            //removing @ and last .
-            for (int i = 0; i < tempkey.Length; i++)
-            {
-                if (tempkey[i] == System.Convert.ToChar(delete))
-                {
-                    delete = "@";
-                }
-                else
-                {
-                    keycopy += tempkey[i];
-                }
-            }
-            tempkey = string.Empty;
-
-            //reversing keycopy
-            for (int i = keycopy.Length - 1; i >= 0; i--)
-            {
-                tempkey += keycopy[i];
-            }
-
-            tempkey = tempkey.Replace(".", ":");
-
-            list.Add(tempkey);
-        }
-
-        finalmails = String.Join(",", list.ToArray());
-
+        string finalmails = FormattedEmails(privatemails.text);
+    
         StartCoroutine(UpdatePrivacyMailsDatabase(key, finalmails));
         
         StartCoroutine(SuccessCreated());
@@ -374,16 +342,16 @@ public class AuthManager : MonoBehaviour
 
     public IEnumerator SuccessCreated()
     {
-        warningCreateContactText.text = "";
-        confirmCreateContactText.text = "Created Successfully";
+        warningCreatePrivacyText.text = "";
+        confirmCreatePrivacyText.text = "Created Successfully";
         yield return new WaitForSeconds(2);
 
-        confirmCreateContactText.text = "Upload your card pic";
+        confirmCreatePrivacyText.text = "Upload your card pic";
         yield return new WaitForSeconds(2);
 
         ClearCreateFields();
         UIManager.instance.MenuScreen();
-        confirmCreateContactText.text = "";
+        confirmCreatePrivacyText.text = "";
 
     }
 
@@ -404,22 +372,20 @@ public class AuthManager : MonoBehaviour
         warningUpdateText.text = "";
         confirmUpdateText.text = "";
         //load data
-        StartCoroutine(LoadUserData());
+        StartCoroutine(LoadUserProfileData());
         
     }
 
-    private IEnumerator LoadUserData()
+    private IEnumerator LoadUserProfileData()
     {
         string key;
         key = getNodeForDB();
 
-        Debug.Log("Hi");
         //Get the currently logged in user data
         var DBTask = DBReference.Child("users").Child(key).GetValueAsync();
 
         yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
 
-        Debug.Log("Bye");
         if (DBTask.Exception != null)
         {
             Debug.LogWarning(message: $"Failed to update task with {DBTask.Exception}");
@@ -436,7 +402,7 @@ public class AuthManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Im in!!");
+            Debug.Log("Loading user data!!");
             //Data has been retrieved
             DataSnapshot snapshot = DBTask.Result;
 
@@ -447,16 +413,8 @@ public class AuthManager : MonoBehaviour
         }
     }
 
-    public void UpdateSubmitButton()
+    public void UpdateProfileNextButton()
     {
-
-        StartCoroutine(UpdateEmailAuth(copyEmailId));
-        //Updating email with conditions (remove last @ and .   then replace all . with : )................................
-        //use same logic while scanning and checking in db
-
-        string key;
-        key = getNodeForDB();
-
         //check if name is valid
         if (!string.IsNullOrEmpty(updateName.text))
         {
@@ -467,14 +425,9 @@ public class AuthManager : MonoBehaviour
                 {
                     if (!string.IsNullOrEmpty(updateExperience.text))
                     {
-                        StartCoroutine(UpdateEmailDatabase(key, copyEmailId));
-                        StartCoroutine(UpdateNameDatabase(key, updateName.text));
-                        StartCoroutine(UpdateAgeDatabase(key, int.Parse(updateAge.text)));
-                        StartCoroutine(UpdateProfessionDatabase(key, updateProfession.text));
-                        StartCoroutine(UpdateExperienceDatabase(key, int.Parse(updateExperience.text)));
-
-                        StartCoroutine(SuccessUpdated());
-
+                        UpdateProfileScene.SetActive(false);
+                        UpdatePrivacyScene.SetActive(true);
+                        //LoadUserPrivacyData();
                     }
                     else
                     {
@@ -494,10 +447,44 @@ public class AuthManager : MonoBehaviour
         else
         {
             warningUpdateText.text = "Name can't be empty";
+        } 
+    }
+
+    public void updatePrivateObjectToggler(bool toggle)
+    {
+        if (toggle)
+
+            UpdatePrivacyPrivateObject.SetActive(false);
+        else
+            UpdatePrivacyPrivateObject.SetActive(true);
+    }
+
+    public IEnumerator LoadUserPrivacyData()
+    {
+        string key;
+        key = getNodeForDB();
+
+        //Get the currently logged in user data
+        var DBTask = DBReference.Child("users").Child(key).GetValueAsync();
+
+        yield return new WaitUntil(predicate: () => DBTask.IsCompleted);
+
+        if (DBTask.Exception != null)
+        {
+            Debug.LogWarning(message: $"Failed to update task with {DBTask.Exception}");
         }
+        else if (DBTask.Result.Value == null)
+        {
+            //No data exists yet
+        }
+        else
+        {
+            Debug.Log("Loading user privacy data!!");
+            //Data has been retrieved
+            DataSnapshot snapshot = DBTask.Result;
 
-
-        
+            updateprivatemails.text = snapshot.Child("accessto").Value.ToString();
+        }
     }
 
     public void UpdateToMenuButton()
@@ -506,6 +493,36 @@ public class AuthManager : MonoBehaviour
         warningUpdateText.text = "";
         confirmUpdateText.text = "";
         UIManager.instance.MenuScreen();
+    }
+
+    public void UpdatePrivacySubmitButton()
+    {
+        StartCoroutine(UpdateEmailAuth(copyEmailId));
+        //Updating email with conditions (remove last @ and .   then replace all . with : )................................
+        //use same logic while scanning and checking in db
+        string key;
+        key = getNodeForDB();
+
+        StartCoroutine(UpdateEmailDatabase(key, copyEmailId));
+        StartCoroutine(UpdateNameDatabase(key, updateName.text));
+        StartCoroutine(UpdateAgeDatabase(key, int.Parse(updateAge.text)));
+        StartCoroutine(UpdateProfessionDatabase(key, updateProfession.text));
+        StartCoroutine(UpdateExperienceDatabase(key, int.Parse(updateExperience.text)));
+
+        updatePrivacyAccess = updatePrivacyToggler.GetComponent<Toggle>().isOn;
+        StartCoroutine(UpdatePrivacyAccessDatabase(key, updatePrivacyAccess));
+
+        string finalmails = FormattedEmails(updateprivatemails.text);
+        StartCoroutine(UpdatePrivacyMailsDatabase(key, finalmails));
+
+        StartCoroutine(SuccessUpdated());
+
+    }
+
+    public void UpdatePrivacyToProfileButton()
+    {
+        UpdatePrivacyScene.SetActive(false);
+        UpdateProfileScene.SetActive(true);
     }
 
     public IEnumerator SuccessUpdated()
@@ -517,7 +534,6 @@ public class AuthManager : MonoBehaviour
         ClearUpdateFields();
         UIManager.instance.MenuScreen();
         confirmUpdateText.text = "";
-
     }
 
     public void ClearUpdateFields()
@@ -651,7 +667,7 @@ public class AuthManager : MonoBehaviour
 
             var k = getNodeForDB();
             UnityMediaPicker.AssignKey(k);
-            Debug.Log("Key==========>" + UnityMediaPicker._key);
+            Debug.Log("Setting key in UnityMediaPicker class ===>" + UnityMediaPicker._key);
 
             yield return new WaitForSeconds(1);
             UIManager.instance.MenuScreen();
@@ -799,6 +815,54 @@ public class AuthManager : MonoBehaviour
         key = key.Replace(".", ":");
 
         return key;
+    }
+
+    private string FormattedEmails(string privateEmails)
+    {
+
+        string[] allmails = privateEmails.Split(new char[] { ',' });
+        List<string> list = new List<string>();
+        string finalmails = "";
+
+        foreach (string mail in allmails)
+        {
+            string tempkey = string.Empty;
+            string keycopy = "";
+            string delete = ".";
+
+            //reversing emailid
+            for (int i = mail.Length - 1; i >= 0; i--)
+            {
+                tempkey += mail[i];
+            }
+
+            //removing @ and last .
+            for (int i = 0; i < tempkey.Length; i++)
+            {
+                if (tempkey[i] == System.Convert.ToChar(delete))
+                {
+                    delete = "@";
+                }
+                else
+                {
+                    keycopy += tempkey[i];
+                }
+            }
+            tempkey = string.Empty;
+
+            //reversing keycopy
+            for (int i = keycopy.Length - 1; i >= 0; i--)
+            {
+                tempkey += keycopy[i];
+            }
+
+            tempkey = tempkey.Replace(".", ":");
+
+            list.Add(tempkey);
+        }
+
+        finalmails = String.Join(",", list.ToArray());
+        return finalmails;
     }
 
     private IEnumerator UpdateEmailAuth(string _email)
