@@ -466,8 +466,6 @@ public class CloudCardReco : MonoBehaviour
 		}
 	}
 
-
-
 	void OnGUI()
 	{
 		// Display current 'scanning' status

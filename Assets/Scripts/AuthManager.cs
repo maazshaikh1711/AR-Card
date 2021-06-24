@@ -161,7 +161,15 @@ public class AuthManager : MonoBehaviour
         ClearRegisterFields();
         copyEmailId = "";
 
-        UIManager.instance.WelcomeScreen();
+        StartCoroutine(SigningOutDelay());
+    }
+
+    public IEnumerator SigningOutDelay()
+    {
+        confirmMenuText.text = "Signing Out...";
+        yield return new WaitForSeconds(1);
+        confirmMenuText.text = "";
+        UIManager.instance.WelcomeScreen(); 
     }
 
 
@@ -527,13 +535,13 @@ public class AuthManager : MonoBehaviour
 
     public IEnumerator SuccessUpdated()
     {
-        warningUpdateText.text = "";
-        confirmUpdateText.text = "Updated Successfully";
+        warningUpdatePrivacyText.text = "";
+        confirmUpdatePrivacyText.text = "Updated Successfully";
         yield return new WaitForSeconds(2);
 
         ClearUpdateFields();
         UIManager.instance.MenuScreen();
-        confirmUpdateText.text = "";
+        confirmUpdatePrivacyText.text = "";
     }
 
     public void ClearUpdateFields()
