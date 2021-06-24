@@ -56,7 +56,7 @@ public class UIManager : MonoBehaviour
     {
         ClearScreen();
         registerUI.SetActive(true);
-    }
+    } 
 
     public void MenuScreen()
     {

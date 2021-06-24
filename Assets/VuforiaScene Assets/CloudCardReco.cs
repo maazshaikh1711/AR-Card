@@ -94,7 +94,7 @@ public class CloudCardReco : MonoBehaviour
 
 
 	}
-	//Unregister cloud reco callbacks when the handler is destroyed
+	//Unregister cloud reco callbacks when the handler is destroyed 
 	void OnDestroy()
 	{
 		mCloudRecoBehaviour.UnregisterOnInitializedEventHandler(OnInitialized);
