@@ -88,5 +88,4 @@ public class UIManager : MonoBehaviour
         ClearScreen();
         deleteUI.SetActive(true);
     }
-
 }

@@ -163,7 +163,6 @@ public class AuthManager : MonoBehaviour
 
         StartCoroutine(SigningOutDelay());
     }
-
     public IEnumerator SigningOutDelay() 
     {
         confirmMenuText.text = "Signing Out...";

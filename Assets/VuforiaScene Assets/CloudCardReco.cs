@@ -91,8 +91,6 @@ public class CloudCardReco : MonoBehaviour
 				Debug.LogError("Could not resolve all Firebase dependencies: " + dependencyStatus);
 			}
 		});
-
-
 	}
 	//Unregister cloud reco callbacks when the handler is destroyed 
 	void OnDestroy()
